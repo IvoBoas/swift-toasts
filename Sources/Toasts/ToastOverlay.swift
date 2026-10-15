@@ -17,7 +17,7 @@ extension View {
 	}
 }
 
-private struct ToastLayer: View {
+struct ToastLayer: View {
 	let toast: ToastMessage?
 	let onAction: (ToastMessage.Action) -> Void
 	var onFrameChange: (CGRect) -> Void = { _ in }

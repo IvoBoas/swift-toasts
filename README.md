@@ -3,6 +3,7 @@
 Lightweight, themeable toasts for SwiftUI, with a [swift-dependencies](https://github.com/pointfreeco/swift-dependencies) service to trigger them from anywhere.
 
 - **Trigger from anywhere.** Call `toastService.show(...)` from a view model, a reducer, or a background task. No view state to thread through.
+- **Or keep it local.** Bind `.toast($toast)` to a view's `@State` and it shows and dismisses the toast for you.
 - **Shows above everything.** On iOS the toast lives in its own window, so it stays visible over sheets, full-screen covers and alerts. Only the toast itself takes touches.
 - **Themeable.** Pick the colors and shadow once with `.toastTheme(...)`. A neutral light/dark default is included.
 - **Four styles.** `success`, `info`, `warning` and `error`, each with a default SF Symbol you can override.
@@ -100,6 +101,27 @@ extension ToastMessage {
 await toastService.show(.saveFailed)
 ```
 
+### Showing a toast on a single view
+
+When a toast only belongs to one screen, skip the service and bind the `.toast` modifier to some `@State`. Set the state to show a toast; the modifier clears it after the toast's `duration`, or when it's tapped, swiped away or its action is pressed:
+
+```swift
+struct ExpenseView: View {
+	@State private var toast: ToastMessage?
+
+	var body: some View {
+		Form {
+			Button("Save") {
+				toast = .success("Expense saved")
+			}
+		}
+		.toast($toast)
+	}
+}
+```
+
+Unlike `toastOverlay`, the toast is drawn in an overlay on the view it's attached to, so it's laid out within that view's bounds and is covered by sheets and alerts presented on top of it. Setting a new toast while one is showing replaces it and restarts the timer.
+
 ### Using it with The Composable Architecture
 
 `ToastService` is a regular dependency, so a root reducer can own the toast state and the dismissal timer, and every feature can show toasts through effects:
@@ -170,7 +192,7 @@ return .run { _ in await toastService.show(.saveFailed) }
 
 ## Theming
 
-Set a theme anywhere above `toastOverlay`. `standard` colors are used for `success` and `info`, and `alert` colors for `error` and `warning`:
+Set a theme anywhere above `toastOverlay` or `.toast($toast)`. `standard` colors are used for `success` and `info`, and `alert` colors for `error` and `warning`:
 
 ```swift
 extension ToastTheme {
